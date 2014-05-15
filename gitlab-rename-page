@@ -1,0 +1,7 @@
+#!/bin/bash
+for fl in *.markdown; do
+  mv $fl $fl.old
+  sed  "s/($1)/($2)/" $fl.old > $fl
+  rm $fl.old
+done
+git mv $1.markdown $2.markdown
