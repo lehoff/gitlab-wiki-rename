@@ -3,7 +3,9 @@ gitlab-wiki-rename
 
 Small script to automate renaming gitlab wiki pages.
 
-Put gitlab-rename-page on your path.
+1. Put gitlab-rename-page inside the GitLab wiki repository.
+1. This should be the same directory where the `.git` directory is listed.
+1. This script will NOT search inside subdirectories.
 
 Use:
 gitlab-rename-page some-page new-page-name
