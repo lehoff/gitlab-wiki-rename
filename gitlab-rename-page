@@ -1,7 +1,41 @@
 #!/bin/bash
+
+# Small script to automate renaming gitlab wiki pages.
+
+# No arguments supplied? Output instructions:
+
+if [ $# -eq 0 ]
+  then
+    echo "\nUsage:\n"
+    echo "gitlab-rename-page some-page new-page-name"
+    exit 1;
+fi
+
+
+# Replace references in .markdown files
+
 for fl in *.markdown; do
   mv $fl $fl.old
   sed  "s/($1)/($2)/" $fl.old > $fl
   rm $fl.old
 done
-git mv $1.markdown $2.markdown
+
+
+# Replace references in .md files
+
+for fl in *.md; do
+  mv $fl $fl.old
+  sed  "s/($1)/($2)/" $fl.old > $fl
+  rm $fl.old
+done
+
+# Rename `some-page.markdown` to `new-page-name.markdown`, ignore failure if file doesn't exist
+
+git mv $1.markdown $2.markdown &>/dev/null
+
+# Rename `some-page.md` to `new-page-name.md`, ignore failure if file doesn't exist
+
+git mv $1.md $2.md &>/dev/null
+
+echo "\n[SUCCESS] Pages renamed and references updated."
+echo "\n\n[REMINDER] Remember to use 'git add' and 'git commit' to apply your changes!"
