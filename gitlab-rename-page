@@ -4,38 +4,62 @@
 
 # No arguments supplied? Output instructions:
 
-if [ $# -eq 0 ]
+if [[ $# < 2 ]]
   then
-    echo "\nUsage:\n"
+    echo "Usage:"
     echo "gitlab-rename-page some-page new-page-name"
     exit 1;
 fi
 
 
+markdownFound=0
+mdFound=0
+
+# Make sure when no files are found that '*.markdown' is not the value of the variable
+echo "Setting nullglob"
+shopt -s nullglob
+
 # Replace references in .markdown files
 
-for fl in *.markdown; do
-  mv $fl $fl.old
-  sed  "s/($1)/($2)/" $fl.old > $fl
-  rm $fl.old
+for wikiFile in *.markdown; do
+  echo "Processing: $wikiFile"
+  mv $wikiFile $wikiFile.old
+  sed  "s/($1)/($2)/" $wikiFile.old > $wikiFile
+  rm $wikiFile.old
+  markdownFound=1
 done
 
 
 # Replace references in .md files
 
-for fl in *.md; do
-  mv $fl $fl.old
-  sed  "s/($1)/($2)/" $fl.old > $fl
-  rm $fl.old
+for wikiFile in *.md; do
+  echo "Processing: $wikiFile"
+  mv $wikiFile $wikiFile.old
+  sed  "s/($1)/($2)/" $wikiFile.old > $wikiFile
+  rm $wikiFile.old
+  mdFound=1
 done
 
-# Rename `some-page.markdown` to `new-page-name.markdown`, ignore failure if file doesn't exist
+# Rename `some-page.markdown` to `new-page-name.markdown`
 
-git mv $1.markdown $2.markdown &>/dev/null
+if [[ "$markdownFound" -eq 1 ]]
+  then
+    echo "Renaming .markdown file"
+    git mv $1.markdown $2.markdown
+fi
 
-# Rename `some-page.md` to `new-page-name.md`, ignore failure if file doesn't exist
 
-git mv $1.md $2.md &>/dev/null
+# Rename `some-page.md` to `new-page-name.md`
 
-echo "\n[SUCCESS] Pages renamed and references updated."
-echo "\n\n[REMINDER] Remember to use 'git add' and 'git commit' to apply your changes!"
+if [[ "$mdFound" -eq 1 ]]
+  then
+    echo "Renaming .md file"
+    git mv $1.md $2.md
+fi
+
+echo "[SUCCESS] Pages renamed and references updated."
+echo "[REMINDER] Remember to use 'git add' and 'git commit' to apply your changes!"
+
+# Set nullglob value back 'unset' as 'unset' is usually the default
+echo "Un-setting nullglob (usually back to default)"
+shopt -u nullglob
