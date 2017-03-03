@@ -1,7 +1,65 @@
 #!/bin/bash
-for fl in *.markdown; do
-  mv $fl $fl.old
-  sed  "s/($1)/($2)/" $fl.old > $fl
-  rm $fl.old
+
+# Small script to automate renaming gitlab wiki pages.
+
+# No arguments supplied? Output instructions:
+
+if [[ $# < 2 ]]
+  then
+    echo "Usage:"
+    echo "gitlab-rename-page some-page new-page-name"
+    exit 1;
+fi
+
+
+markdownFound=0
+mdFound=0
+
+# Make sure when no files are found that '*.markdown' is not the value of the variable
+echo "Setting nullglob"
+shopt -s nullglob
+
+# Replace references in .markdown files
+
+for wikiFile in *.markdown; do
+  echo "Processing: $wikiFile"
+  mv $wikiFile $wikiFile.old
+  sed  "s/($1)/($2)/" $wikiFile.old > $wikiFile
+  rm $wikiFile.old
+  markdownFound=1
 done
-git mv $1.markdown $2.markdown
+
+
+# Replace references in .md files
+
+for wikiFile in *.md; do
+  echo "Processing: $wikiFile"
+  mv $wikiFile $wikiFile.old
+  sed  "s/($1)/($2)/" $wikiFile.old > $wikiFile
+  rm $wikiFile.old
+  mdFound=1
+done
+
+# Rename `some-page.markdown` to `new-page-name.markdown`
+
+if [[ "$markdownFound" -eq 1 ]]
+  then
+    echo "Renaming .markdown file"
+    git mv $1.markdown $2.markdown
+fi
+
+
+# Rename `some-page.md` to `new-page-name.md`
+
+if [[ "$mdFound" -eq 1 ]]
+  then
+    echo "Renaming .md file"
+    git mv $1.md $2.md
+fi
+
+echo "[SUCCESS] Pages renamed and references updated."
+echo "[REMINDER] Remember to use 'git add' and 'git commit' to apply your changes!"
+
+# Set nullglob value back 'unset' as 'unset' is usually the default
+echo "Un-setting nullglob (usually back to default)"
+shopt -u nullglob
